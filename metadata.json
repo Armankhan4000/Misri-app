@@ -1,0 +1,6 @@
+{
+  "name": "Mistri Admin Dashboard",
+  "description": "Super Admin control panel for managing local on-demand service technicians, bookings, commissions, and promotions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
