@@ -13,7 +13,8 @@ import {
   Download, 
   UserCheck, 
   X,
-  Gauge
+  Gauge,
+  MapPin
 } from 'lucide-react';
 import { Technician } from '../types';
 
@@ -23,6 +24,8 @@ interface TechnicianViewProps {
   onReject: (id: string) => void;
   onToggleSuspend: (id: string) => void;
   onToggleFeatured: (id: string) => void;
+  onUpdateVerification?: (id: string, updates: Partial<Technician>) => void;
+  onViewLocation?: (id: string) => void;
 }
 
 export default function TechnicianManagementView({ 
@@ -30,11 +33,29 @@ export default function TechnicianManagementView({
   onApprove, 
   onReject, 
   onToggleSuspend, 
-  onToggleFeatured 
+  onToggleFeatured,
+  onUpdateVerification,
+  onViewLocation
 }: TechnicianViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [tab, setTab] = useState<'Pending' | 'Approved' | 'Suspended'>('Pending');
   const [selectedTechId, setSelectedTechId] = useState<string | null>(null);
+
+  // Editable draft states for the active technician details modal
+  const selectedTech = technicians.find(t => t.id === selectedTechId);
+  const [techNid, setTechNid] = useState('');
+  const [techNidVerified, setTechNidVerified] = useState(false);
+  const [techPoliceVerified, setTechPoliceVerified] = useState(false);
+  const [techExpYears, setTechExpYears] = useState(1);
+
+  React.useEffect(() => {
+    if (selectedTech) {
+      setTechNid(selectedTech.nidNumber || '');
+      setTechNidVerified(!!selectedTech.nidVerified);
+      setTechPoliceVerified(!!selectedTech.policeVerified);
+      setTechExpYears(selectedTech.experienceYears || 1);
+    }
+  }, [selectedTechId, selectedTech]);
 
   const filteredTechs = technicians.filter(tech => {
     const matchesSearch = tech.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -43,8 +64,6 @@ export default function TechnicianManagementView({
                           tech.id.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch && tech.status === tab;
   });
-
-  const selectedTech = technicians.find(t => t.id === selectedTechId);
 
   return (
     <div className="space-y-6" id="technician-view-main">
@@ -142,6 +161,18 @@ export default function TechnicianManagementView({
                     <p className="text-[10px] text-slate-500 font-mono mt-0.5">{tech.id} • {tech.city}</p>
                   </div>
                 </div>
+
+                {onViewLocation && (
+                  <button
+                    id={`btn-track-tech-${tech.id}`}
+                    onClick={() => onViewLocation(tech.id)}
+                    className="p-1.5 px-2 bg-cyan-950/80 hover:bg-cyan-900 text-cyan-400 rounded-lg border border-cyan-800/30 font-bold tracking-tight transition-all cursor-pointer flex items-center gap-1 shadow-sm text-[10px]"
+                    title="লোকেশন ট্র্যাকিং দেখুন"
+                  >
+                    <MapPin className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                    <span>লোকেশন</span>
+                  </button>
+                )}
               </div>
 
               {/* Performance Indicator Metrics */}
@@ -167,11 +198,11 @@ export default function TechnicianManagementView({
 
               {/* Verification Queue items specifically */}
               {tech.status === 'Pending' && (
-                <div className="bg-slate-950/60 border border-slate-800/40 rounded-lg p-3 mb-4 space-y-2.5" id={`kyc-details-${tech.id}`}>
+                <div className="bg-slate-950/60 border border-slate-800/40 rounded-lg p-3 mb-3 space-y-2.5" id={`kyc-details-${tech.id}`}>
                   <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider font-mono flex items-center gap-1">
                     <FileText className="h-3.5 w-3.5" /> Credentials Submitted
                   </p>
-                  <div className="flex justify-between items-center text-xs text-slate-300">
+                  <div className="flex justify-between items-center text-xs text-slate-350">
                     <span className="truncate max-w-[120px] text-[11px] font-sans">Govt ID & Utility Certification</span>
                     <a 
                       href={tech.documentUrl || '#'} 
@@ -186,6 +217,88 @@ export default function TechnicianManagementView({
                   </div>
                 </div>
               )}
+
+              {/* Security Shield & Anti-Fake Oversight Panel */}
+              <div className="bg-slate-950/55 rounded-xl p-3 mb-3 border border-slate-850/80 space-y-2" id={`security-shield-${tech.id}`}>
+                <div className="flex justify-between items-center pb-0.5 border-b border-slate-900">
+                  <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider font-mono flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 bg-cyan-400 rounded-full animate-pulse"></span>
+                    Verified Oversight
+                  </span>
+                  <span className="text-[9px] font-mono text-slate-500">Exp: {tech.experienceYears || 1} Yrs</span>
+                </div>
+
+                <div className="flex flex-col gap-1.5 text-xs text-slate-300">
+                  {/* NID Input inline toggle */}
+                  <div className="flex items-center justify-between pb-0.5">
+                    <span className="text-[11px] text-slate-400 font-sans">NID: <span className="font-mono text-white text-[10px]">{tech.nidNumber || 'Not configured'}</span></span>
+                    <button
+                      id={`tech-toggle-nid-${tech.id}`}
+                      onClick={() => {
+                        onUpdateVerification?.(tech.id, { 
+                          nidVerified: !tech.nidVerified,
+                          nidNumber: tech.nidNumber || `BD-NID-${Math.floor(Math.random() * 900000) + 100000}`
+                        });
+                      }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        tech.nidVerified 
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                          : 'bg-rose-500/10 text-rose-450 border border-rose-500/20'
+                      }`}
+                    >
+                      {tech.nidVerified ? 'Verified ID ✓' : 'Verify NID ⚙'}
+                    </button>
+                  </div>
+
+                  {/* Police clearance toggle */}
+                  <div className="flex items-center justify-between pb-0.5">
+                    <span className="text-[11px] text-slate-400 font-sans">Police Background</span>
+                    <button
+                      id={`tech-toggle-police-${tech.id}`}
+                      onClick={() => {
+                        onUpdateVerification?.(tech.id, { policeVerified: !tech.policeVerified });
+                      }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        tech.policeVerified 
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                          : 'bg-rose-500/10 text-rose-450 border border-rose-500/20'
+                      }`}
+                    >
+                      {tech.policeVerified ? 'Cleared ✓' : 'Uncleared ⚙'}
+                    </button>
+                  </div>
+
+                  {/* Years of Experience Editor */}
+                  <div className="flex items-center justify-between pt-0.5">
+                    <span className="text-[11px] text-slate-400 font-sans">Experience Years</span>
+                    <div className="flex items-center gap-1.5" id={`exp-picker-${tech.id}`}>
+                      <button
+                        id={`btn-exp-dec-${tech.id}`}
+                        onClick={() => {
+                          const nextExp = Math.max(1, (tech.experienceYears || 1) - 1);
+                          onUpdateVerification?.(tech.id, { experienceYears: nextExp });
+                        }}
+                        className="h-5 w-5 bg-slate-800 hover:bg-slate-700 text-xs font-black rounded flex items-center justify-center cursor-pointer text-slate-300"
+                        title="Decrement experience years"
+                      >
+                        -
+                      </button>
+                      <span className="text-xs font-mono font-bold text-white w-4 text-center">{tech.experienceYears || 1}</span>
+                      <button
+                        id={`btn-exp-inc-${tech.id}`}
+                        onClick={() => {
+                          const nextExp = (tech.experienceYears || 1) + 1;
+                          onUpdateVerification?.(tech.id, { experienceYears: nextExp });
+                        }}
+                        className="h-5 w-5 bg-slate-800 hover:bg-slate-700 text-xs font-black rounded flex items-center justify-center cursor-pointer text-slate-300"
+                        title="Increment experience years"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Grid card actions */}

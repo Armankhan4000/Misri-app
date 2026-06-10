@@ -12,6 +12,8 @@ export interface Customer {
   createdAt: string;
   totalBookings: number;
   totalSpent: number;
+  nidNumber?: string;
+  nidStatus?: 'Unsubmitted' | 'Pending' | 'Verified' | 'Rejected';
 }
 
 export interface Technician {
@@ -28,6 +30,10 @@ export interface Technician {
   jobsCompleted: number;
   revenueGenerated: number;
   documentUrl?: string;
+  nidNumber?: string;
+  nidVerified?: boolean;
+  policeVerified?: boolean;
+  experienceYears?: number;
 }
 
 export interface Booking {

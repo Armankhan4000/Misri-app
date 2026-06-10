@@ -13,7 +13,8 @@ import {
   TrendingUp, 
   BadgeAlert,
   SlidersHorizontal,
-  ChevronRight
+  ChevronRight,
+  MapPin
 } from 'lucide-react';
 import { Customer, Booking } from '../types';
 
@@ -21,12 +22,33 @@ interface CustomerViewProps {
   customers: Customer[];
   bookings: Booking[];
   onToggleSuspend: (id: string) => void;
+  onUpdateCustomerNid?: (id: string, nidNum: string, status: Customer['nidStatus']) => void;
+  onViewLocation?: (id: string) => void;
 }
 
-export default function CustomerManagementView({ customers, bookings, onToggleSuspend }: CustomerViewProps) {
+export default function CustomerManagementView({ 
+  customers, 
+  bookings, 
+  onToggleSuspend, 
+  onUpdateCustomerNid,
+  onViewLocation 
+}: CustomerViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Active' | 'Suspended'>('All');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+
+  // Sync temp states for live editing within Customer modal
+  const [nidInput, setNidInput] = useState('');
+  const [nidStatusInput, setNidStatusInput] = useState<'Unsubmitted' | 'Pending' | 'Verified' | 'Rejected'>('Unsubmitted');
+
+  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+
+  React.useEffect(() => {
+    if (selectedCustomer) {
+      setNidInput(selectedCustomer.nidNumber || '');
+      setNidStatusInput(selectedCustomer.nidStatus || 'Unsubmitted');
+    }
+  }, [selectedCustomerId, selectedCustomer]);
 
   // Filter customers logic
   const filteredCustomers = customers.filter(cust => {
@@ -38,7 +60,6 @@ export default function CustomerManagementView({ customers, bookings, onToggleSu
     return matchesSearch && cust.status === filterStatus;
   });
 
-  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
   const selectedCustomerBookings = selectedCustomerId 
     ? bookings.filter(b => b.customerId === selectedCustomerId) 
     : [];
@@ -141,6 +162,16 @@ export default function CustomerManagementView({ customers, bookings, onToggleSu
                   </td>
                   <td className="py-4 px-5 text-right font-sans" onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2 justify-end">
+                      {onViewLocation && (
+                        <button
+                          id={`btn-track-cust-${cust.id}`}
+                          onClick={() => onViewLocation(cust.id)}
+                          className="p-1 px-2 bg-cyan-950 hover:bg-cyan-900 border border-cyan-800/40 text-cyan-400 text-xs rounded font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                          title="লোকেশন ম্যাপে দেখুন"
+                        >
+                          <MapPin className="h-3 w-3 text-cyan-400" /> Track
+                        </button>
+                      )}
                       <button
                         id={`btn-open-profile-${cust.id}`}
                         onClick={() => setSelectedCustomerId(cust.id)}
@@ -268,6 +299,62 @@ export default function CustomerManagementView({ customers, bookings, onToggleSu
                   </div>
                 </div>
 
+                {/* NID Card Verification Frame (Anti-Fake Control) */}
+                <div className="bg-slate-950 border border-slate-800/80 p-4 rounded-xl space-y-3" id="nid-verification-section">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 font-sans">
+                      <span className="h-2 w-2 rounded-full bg-cyan-400 inline-block animate-pulse"></span>
+                      Anti-Fake Shield: Customer NID (জাতীয় পরিচয়পত্র)
+                    </h4>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                      nidStatusInput === 'Verified' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                      nidStatusInput === 'Pending' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                      nidStatusInput === 'Rejected' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
+                      'bg-slate-800 text-slate-400'
+                    }`}>
+                      {nidStatusInput}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1 text-xs">
+                      <label className="text-slate-400 font-medium font-sans">National ID (NID) Number</label>
+                      <input 
+                        type="text" 
+                        value={nidInput}
+                        onChange={(e) => setNidInput(e.target.value)}
+                        placeholder="e.g. 5421-9082-1102"
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-white text-xs font-mono focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1 text-xs font-sans">
+                      <label className="text-slate-400 font-medium">Verify Action</label>
+                      <select 
+                        value={nidStatusInput}
+                        onChange={(e) => setNidStatusInput(e.target.value as any)}
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-350 text-xs focus:outline-none focus:border-cyan-500"
+                      >
+                        <option value="Unsubmitted">Unsubmitted (জমা দেওয়া হয়নি)</option>
+                        <option value="Pending">Pending Audit (যাচাইকরণ পেন্ডিং)</option>
+                        <option value="Verified">Verified Pass (সনাক্তকরণ সম্পন্ন)</option>
+                        <option value="Rejected">Rejected Fail (বাতিল / ফেক আইডি)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <button 
+                      onClick={() => {
+                        onUpdateCustomerNid?.(selectedCustomer.id, nidInput, nidStatusInput);
+                      }}
+                      className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 hover:scale-[1.02] text-slate-950 text-xs font-extrabold rounded-lg transition-all cursor-pointer shadow-lg shadow-cyan-600/10"
+                    >
+                      Apply & Sync NID to Cloud
+                    </button>
+                  </div>
+                </div>
+
                 {/* Booking History sub-panel */}
                 <div className="space-y-3" id="modal-cust-history">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
@@ -324,6 +411,18 @@ export default function CustomerManagementView({ customers, bookings, onToggleSu
                   <Ban className="h-3.5 w-3.5" />
                   {selectedCustomer.status === 'Active' ? 'Suspend Account Session' : 'Reinstate Regular Session'}
                 </button>
+                {onViewLocation && (
+                  <button
+                    id="btn-track-cust-modal-footer"
+                    onClick={() => {
+                      onViewLocation(selectedCustomer.id);
+                      setSelectedCustomerId(null);
+                    }}
+                    className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-extrabold text-xs rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors"
+                  >
+                    <MapPin className="h-3.5 w-3.5 text-slate-950" /> Track Location (লোকেশন দেখুন)
+                  </button>
+                )}
                 <button 
                   id="btn-close-modal-bottom-action"
                   onClick={() => setSelectedCustomerId(null)}

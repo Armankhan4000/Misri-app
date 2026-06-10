@@ -10,7 +10,9 @@ export const initialCustomers: Customer[] = [
     status: 'Active',
     createdAt: '2026-01-15',
     totalBookings: 14,
-    totalSpent: 12450
+    totalSpent: 12450,
+    nidNumber: '5421-9082-1102',
+    nidStatus: 'Verified'
   },
   {
     id: 'CUST-8102',
@@ -21,7 +23,9 @@ export const initialCustomers: Customer[] = [
     status: 'Active',
     createdAt: '2026-02-23',
     totalBookings: 8,
-    totalSpent: 6200
+    totalSpent: 6200,
+    nidNumber: '1092-4821-3829',
+    nidStatus: 'Verified'
   },
   {
     id: 'CUST-5512',
@@ -32,7 +36,9 @@ export const initialCustomers: Customer[] = [
     status: 'Suspended',
     createdAt: '2026-03-05',
     totalBookings: 2,
-    totalSpent: 1500
+    totalSpent: 1500,
+    nidNumber: '3209-1123-5542',
+    nidStatus: 'Pending'
   },
   {
     id: 'CUST-9821',
@@ -43,7 +49,9 @@ export const initialCustomers: Customer[] = [
     status: 'Active',
     createdAt: '2026-04-12',
     totalBookings: 19,
-    totalSpent: 18900
+    totalSpent: 18900,
+    nidNumber: '7721-3942-8101',
+    nidStatus: 'Verified'
   },
   {
     id: 'CUST-4112',
@@ -54,7 +62,9 @@ export const initialCustomers: Customer[] = [
     status: 'Active',
     createdAt: '2026-05-01',
     totalBookings: 5,
-    totalSpent: 4100
+    totalSpent: 4100,
+    nidNumber: '6620-8193-4012',
+    nidStatus: 'Unsubmitted'
   }
 ];
 
@@ -72,7 +82,11 @@ export const initialTechnicians: Technician[] = [
     rating: 4.8,
     jobsCompleted: 124,
     revenueGenerated: 85000,
-    documentUrl: 'https://example.com/docs/imran_id.pdf'
+    documentUrl: 'https://example.com/docs/imran_id.pdf',
+    nidNumber: '3310-9281-0029',
+    nidVerified: true,
+    policeVerified: true,
+    experienceYears: 6
   },
   {
     id: 'TECH-102',
@@ -87,7 +101,11 @@ export const initialTechnicians: Technician[] = [
     rating: 4.5,
     jobsCompleted: 98,
     revenueGenerated: 59000,
-    documentUrl: 'https://example.com/docs/suresh_cert.pdf'
+    documentUrl: 'https://example.com/docs/suresh_cert.pdf',
+    nidNumber: '1102-4421-4491',
+    nidVerified: true,
+    policeVerified: true,
+    experienceYears: 4
   },
   {
     id: 'TECH-103',
@@ -102,7 +120,11 @@ export const initialTechnicians: Technician[] = [
     rating: 0,
     jobsCompleted: 0,
     revenueGenerated: 0,
-    documentUrl: 'https://example.com/docs/rajesh_license.pdf'
+    documentUrl: 'https://example.com/docs/rajesh_license.pdf',
+    nidNumber: '2019-3321-4410',
+    nidVerified: false,
+    policeVerified: false,
+    experienceYears: 2
   },
   {
     id: 'TECH-104',
@@ -117,7 +139,11 @@ export const initialTechnicians: Technician[] = [
     rating: 4.9,
     jobsCompleted: 145,
     revenueGenerated: 112000,
-    documentUrl: 'https://example.com/docs/nisha_diploma.pdf'
+    documentUrl: 'https://example.com/docs/nisha_diploma.pdf',
+    nidNumber: '2321-9922-8109',
+    nidVerified: true,
+    policeVerified: true,
+    experienceYears: 5
   },
   {
     id: 'TECH-105',
@@ -132,7 +158,11 @@ export const initialTechnicians: Technician[] = [
     rating: 3.2,
     jobsCompleted: 12,
     revenueGenerated: 9400,
-    documentUrl: 'https://example.com/docs/farhan_id.pdf'
+    documentUrl: 'https://example.com/docs/farhan_id.pdf',
+    nidNumber: '4821-2391-4451',
+    nidVerified: true,
+    policeVerified: false,
+    experienceYears: 3
   },
   {
     id: 'TECH-106',
@@ -147,7 +177,11 @@ export const initialTechnicians: Technician[] = [
     rating: 0,
     jobsCompleted: 0,
     revenueGenerated: 0,
-    documentUrl: 'https://example.com/docs/kabir_nid.pdf'
+    documentUrl: 'https://example.com/docs/kabir_nid.pdf',
+    nidNumber: '1982-3849-5510',
+    nidVerified: false,
+    policeVerified: false,
+    experienceYears: 1
   }
 ];
 

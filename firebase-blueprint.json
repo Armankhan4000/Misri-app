@@ -1,0 +1,176 @@
+{
+  "entities": {
+    "customer": {
+      "title": "Customer",
+      "description": "A booking customer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "avatar": { "type": "string" },
+        "status": { "type": "string", "enum": ["Active", "Suspended"] },
+        "createdAt": { "type": "string" },
+        "totalBookings": { "type": "number" },
+        "totalSpent": { "type": "number" },
+        "nidNumber": { "type": "string" },
+        "nidStatus": { "type": "string", "enum": ["Unsubmitted", "Pending", "Verified", "Rejected"] }
+      },
+      "required": ["id", "name", "email", "phone"]
+    },
+    "technician": {
+      "title": "Technician",
+      "description": "A technician/mistri partner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "avatar": { "type": "string" },
+        "category": { "type": "string" },
+        "city": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Suspended"] },
+        "isFeatured": { "type": "boolean" },
+        "rating": { "type": "number" },
+        "jobsCompleted": { "type": "number" },
+        "revenueGenerated": { "type": "number" },
+        "documentUrl": { "type": "string" },
+        "nidNumber": { "type": "string" },
+        "nidVerified": { "type": "boolean" },
+        "policeVerified": { "type": "boolean" },
+        "experienceYears": { "type": "number" }
+      },
+      "required": ["id", "name", "email", "phone", "category", "city"]
+    },
+    "booking": {
+      "title": "Booking",
+      "description": "Service dispatches",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "technicianId": { "type": "string" },
+        "technicianName": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["Live", "Completed", "Cancelled"] },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "amount": { "type": "number" }
+      },
+      "required": ["id", "customerId", "technicianId", "status"]
+    },
+    "banner": {
+      "title": "Banner",
+      "description": "Advertisement banner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "location": { "type": "string" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "scheduleDays": { "type": "array" },
+        "clicks": { "type": "number" },
+        "status": { "type": "string", "enum": ["Active", "Scheduled", "Expired"] }
+      },
+      "required": ["id", "title", "imageUrl", "status"]
+    },
+    "promoCode": {
+      "title": "PromoCode",
+      "description": "Promo coupon",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "discountType": { "type": "string", "enum": ["Percentage", "Fixed"] },
+        "discountValue": { "type": "number" },
+        "minBookingValue": { "type": "number" },
+        "expiryDate": { "type": "string" },
+        "status": { "type": "string", "enum": ["Active", "Expired"] },
+        "type": { "type": "string", "enum": ["General", "Festival", "Referral", "Cashback"] }
+      },
+      "required": ["id", "code", "discountType", "discountValue"]
+    },
+    "product": {
+      "title": "Product",
+      "description": "Spare parts shop items",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "quantity": { "type": "number" },
+        "vendor": { "type": "string" },
+        "status": { "type": "string", "enum": ["In Stock", "Low Stock", "Out Of Stock"] },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "price", "quantity"]
+    },
+    "order": {
+      "title": "ShopOrder",
+      "description": "Product spares purchases",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerName": { "type": "string" },
+        "productName": { "type": "string" },
+        "quantity": { "type": "number" },
+        "totalCost": { "type": "number" },
+        "date": { "type": "string" },
+        "status": { "type": "string", "enum": ["Processing", "Shipped", "Delivered", "Returned"] }
+      },
+      "required": ["id", "customerName", "productName", "totalCost"]
+    },
+    "systemLog": {
+      "title": "SystemLog",
+      "description": "Global activity logs",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string" },
+        "level": { "type": "string", "enum": ["INFO", "WARNING", "ERROR"] },
+        "module": { "type": "string" },
+        "message": { "type": "string" }
+      },
+      "required": ["timestamp", "level", "message"]
+    }
+  },
+  "firestore": {
+    "customers": {
+      "schema": "customer",
+      "description": "Live directory of registered platform customers"
+    },
+    "technicians": {
+      "schema": "technician",
+      "description": "Verified or pending expert partners listing"
+    },
+    "bookings": {
+      "schema": "booking",
+      "description": "On-demand emergency dispatches"
+    },
+    "banners": {
+      "schema": "banner",
+      "description": "Interactive advertising campaigns"
+    },
+    "promoCodes": {
+      "schema": "promoCode",
+      "description": "Customer discount coupons"
+    },
+    "products": {
+      "schema": "product",
+      "description": "Online spare parts inventory items"
+    },
+    "orders": {
+      "schema": "order",
+      "description": "Customer purchase transaction records"
+    },
+    "systemLogs": {
+      "schema": "systemLog",
+      "description": "System core telemetry logs"
+    }
+  }
+}

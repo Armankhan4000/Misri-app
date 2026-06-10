@@ -12,15 +12,23 @@ import {
   AlertTriangle, 
   CheckCircle,
   Key,
-  Database
+  Database,
+  Lock,
+  Mail
 } from 'lucide-react';
 import { SystemLog } from '../types';
 
 interface SettingsProps {
   logs: SystemLog[];
+  currentAdminEmail?: string;
+  onAdminEmailChange?: (newEmail: string) => void;
 }
 
-export default function SettingsView({ logs }: SettingsProps) {
+export default function SettingsView({ 
+  logs, 
+  currentAdminEmail = 'armanhossain0810200@gmail.com', 
+  onAdminEmailChange 
+}: SettingsProps) {
   const [subTab, setSubTab] = useState<'App' | 'Payments' | 'Gateways' | 'Security' | 'Admins' | 'Backup'>('App');
   const [downloading, setDownloading] = useState(false);
 
@@ -41,6 +49,65 @@ export default function SettingsView({ logs }: SettingsProps) {
   // Security States
   const [twoFactor, setTwoFactor] = useState(true);
   const [sessionTimeout, setSessionTimeout] = useState(30);
+
+  // Security change states
+  const [credCurrentPassword, setCredCurrentPassword] = useState('');
+  const [credNewEmail, setCredNewEmail] = useState(currentAdminEmail);
+  const [credNewPassword, setCredNewPassword] = useState('');
+  const [credConfirmPassword, setCredConfirmPassword] = useState('');
+  const [credError, setCredError] = useState('');
+  const [credSuccess, setCredSuccess] = useState('');
+
+  const handleUpdateCredentials = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCredError('');
+    setCredSuccess('');
+
+    const savedPassword = localStorage.getItem('mistri_admin_password') || '@1310694000';
+    if (credCurrentPassword !== savedPassword) {
+      setCredError('ভুল বর্তমান পাসওয়ার্ড! পুনরায় চেষ্টা করুন। (Your current password is required)');
+      return;
+    }
+
+    if (!credNewEmail.trim()) {
+      setCredError('নতুন ইমেইল খালি হতে পারে না।');
+      return;
+    }
+
+    if (credNewPassword && credNewPassword.length < 6) {
+      setCredError('নতুন পাসওয়ার্ডটি অন্ততঃপক্ষে ৬ অক্ষরের হতে হবে।');
+      return;
+    }
+
+    if (credNewPassword !== credConfirmPassword) {
+      setCredError('নতুন পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড ম্যাচ করেনি!');
+      return;
+    }
+
+    // Persist changes to local storage
+    localStorage.setItem('mistri_admin_email', credNewEmail.trim().toLowerCase());
+    if (credNewPassword) {
+      localStorage.setItem('mistri_admin_password', credNewPassword);
+    }
+
+    if (onAdminEmailChange) {
+      onAdminEmailChange(credNewEmail.trim().toLowerCase());
+    }
+
+    // Update locally too
+    setAdmins(prev => 
+      prev.map(a => 
+        a.role === 'Super Admin' 
+          ? { ...a, email: credNewEmail.trim().toLowerCase() } 
+          : a
+      )
+    );
+
+    setCredSuccess('অ্যাডমিন ক্রেডেনশিয়ালস সফলভাবে আপডেট হয়েছে!');
+    setCredCurrentPassword('');
+    setCredNewPassword('');
+    setCredConfirmPassword('');
+  };
 
   // Admin users list
   const [admins, setAdmins] = useState([
@@ -347,6 +414,108 @@ export default function SettingsView({ logs }: SettingsProps) {
               />
               <p className="text-[10px] text-slate-500 mt-1">Saves your session and logs out automatically if inactive.</p>
             </div>
+          </div>
+
+          {/* Super Admin Credential Form */}
+          <div className="border-t border-slate-800 pt-6 mt-6 space-y-4" id="credential-change-block">
+            <div>
+              <h4 className="font-bold text-white text-sm flex items-center gap-1.5 font-sans">
+                <Key className="h-4.5 w-4.5 text-cyan-400" />
+                এডমিন ক্রেডেনশিয়ালস ও পাসওয়ার্ড পরিবর্তন / Super Admin Credentials
+              </h4>
+              <p className="text-[11px] text-slate-400 mt-1">
+                নিরাপত্তার স্বার্থে সুপার এডমিন ইমেইল এবং প্যানেল অ্যাক্সেস পাসওয়ার্ড এখান থেকে পরিবর্তন করতে পারবেন।
+              </p>
+            </div>
+
+            {credError && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 font-sans">
+                {credError}
+              </div>
+            )}
+
+            {credSuccess && (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-400 font-sans">
+                {credSuccess}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateCredentials} className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-slate-300 text-xs font-bold block font-sans">নতুন ইমেইল এড্রেস / New Email</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                    <Mail className="h-3.5 w-3.5" />
+                  </span>
+                  <input 
+                    type="email"
+                    required
+                    value={credNewEmail}
+                    onChange={(e) => setCredNewEmail(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-9 pr-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-300 text-xs font-bold block font-sans">বর্তমান পাসওয়ার্ড / Current Password (Verification)</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                    <Lock className="h-3.5 w-3.5" />
+                  </span>
+                  <input 
+                    type="password"
+                    required
+                    placeholder="বর্তমান পাসওয়ার্ড দিন"
+                    value={credCurrentPassword}
+                    onChange={(e) => setCredCurrentPassword(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-9 pr-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-300 text-xs font-bold block font-sans">নতুন পাসওয়ার্ড / New Password (Optional)</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                    <Lock className="h-3.5 w-3.5 text-cyan-400/40" />
+                  </span>
+                  <input 
+                    type="password"
+                    placeholder="নতুন পাসওয়ার্ড দিন (কমপক্ষে ৬ অক্ষর)"
+                    value={credNewPassword}
+                    onChange={(e) => setCredNewPassword(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-9 pr-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-300 text-xs font-bold block font-sans">নতুন পাসওয়ার্ড নিশ্চিত করুন / Confirm Password</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                    <Lock className="h-3.5 w-3.5 text-cyan-400/40" />
+                  </span>
+                  <input 
+                    type="password"
+                    placeholder="নতুন পাসওয়ার্ড পুনরায় লিখুন"
+                    value={credConfirmPassword}
+                    onChange={(e) => setCredConfirmPassword(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-9 pr-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="md:col-span-2 flex justify-end pt-2">
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 text-xs font-black rounded-xl inline-flex items-center gap-1.5 cursor-pointer transition-all hover:scale-[1.02] shadow-lg shadow-cyan-600/10 font-sans"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>ক্রেডেনশিয়ালস পরিবর্তন করুন / Update Admin Login</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

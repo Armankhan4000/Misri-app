@@ -7,35 +7,50 @@ interface LoginViewProps {
 }
 
 export default function LoginView({ onLoginSuccess }: LoginViewProps) {
-  const [email, setEmail] = useState('armanhossain0810200@gmail.com');
-  const [password, setPassword] = useState('@1310694000');
+  const [email, setEmail] = useState(() => {
+    return localStorage.getItem('mistri_admin_email') || 'armanhossain0810200@gmail.com';
+  });
+  const [password, setPassword] = useState(() => {
+    return localStorage.getItem('mistri_admin_password') || '@1310694000';
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      setError('Please enter your admin email.');
+      setError('সঠিক এডমিন ইমেইল দিন। / Please enter your admin email.');
       return;
     }
     if (!password) {
-      setError('Please enter your password.');
+      setError('পাসওয়ার্ড প্রবেশ করান। / Please enter your password.');
       return;
     }
 
     setLoading(true);
     setError('');
 
-    // Simulate server-side admin login authentication
+    // Fetch the stored credentials to validate against
+    const savedEmail = localStorage.getItem('mistri_admin_email') || 'armanhossain0810200@gmail.com';
+    const savedPassword = localStorage.getItem('mistri_admin_password') || '@1310694000';
+
     setTimeout(() => {
       setLoading(false);
-      onLoginSuccess(email);
+      
+      if (email.trim().toLowerCase() !== savedEmail.trim().toLowerCase() || password !== savedPassword) {
+        setError('ভুল এডমিন ইমেল অথবা পাসওয়ার্ড! বর্তমান সঠিক ক্রেডেনশিয়ালস ব্যবহারের নিশ্চয়তা নিন।');
+        return;
+      }
+      
+      onLoginSuccess(email.trim().toLowerCase());
     }, 800);
   };
 
   const setDemoCredentials = () => {
-    setEmail('armanhossain0810200@gmail.com');
-    setPassword('@1310694000');
+    const savedEmail = localStorage.getItem('mistri_admin_email') || 'armanhossain0810200@gmail.com';
+    const savedPassword = localStorage.getItem('mistri_admin_password') || '@1310694000';
+    setEmail(savedEmail);
+    setPassword(savedPassword);
   };
 
   return (

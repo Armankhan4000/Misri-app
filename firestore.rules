@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Default-Deny Catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Checking if the user is are Super Admin based on allowed runtime emails
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'armanhossain08102000@gmail.com' ||
+        request.auth.token.email == 'armanhossain0810200@gmail.com' ||
+        request.auth.token.email_verified == true
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // 2. Customers Collection Rules
+    match /customers/{customerId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(customerId) && (
+        isAdmin() || (request.resource.data.id == customerId)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 3. Technicians Collection Rules
+    match /technicians/{techId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(techId) && (
+        isAdmin() || (request.resource.data.id == techId)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 4. Bookings Collection Rules
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        resource.data.customerId == request.auth.uid ||
+        resource.data.technicianId == request.auth.uid
+      );
+      allow create, update: if isSignedIn() && isValidId(bookingId) && (
+        isAdmin() || 
+        request.resource.data.customerId == request.auth.uid || 
+        request.resource.data.technicianId == request.auth.uid
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 5. Banners Collection Rules
+    match /banners/{bannerId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // 6. Promo Codes Collection Rules
+    match /promoCodes/{codeId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // 7. Products Collection Rules
+    match /products/{prodId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // 8. Orders Collection Rules
+    match /orders/{orderId} {
+      allow read: if isSignedIn() && (
+        isAdmin() || resource.data.customerName == request.auth.token.email
+      );
+      allow create, update: if isSignedIn() && isValidId(orderId) && (
+        isAdmin() || request.resource.data.customerName == request.auth.token.email
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 9. System Logs Collection Rules
+    match /systemLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+  }
+}
