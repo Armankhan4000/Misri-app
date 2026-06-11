@@ -103,6 +103,13 @@ export const translations: Translations = {
     es: 'Ajustes y Seguridad',
     ar: 'الإعدادات والأمان'
   },
+  servicesSuite: {
+    en: 'Services Suite (Core)',
+    bn: 'ম্যানেজমেন্ট স্যুট (নতুন/৫টি ফিচার)',
+    hi: 'सेवाएँ सूट (नवीनतम)',
+    es: 'Suite de Servicios',
+    ar: 'حزمة الخدمات المتكاملة'
+  },
 
   // General Topbar
   adminPanel: {

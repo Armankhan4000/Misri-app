@@ -22,7 +22,8 @@ import {
   HardHat,
   MapPin,
   Smartphone,
-  Globe
+  Globe,
+  Layers
 } from 'lucide-react';
 
 import { Language, getTranslation } from './translations';
@@ -65,6 +66,7 @@ import AnalyticsView from './components/AnalyticsView';
 import SettingsView from './components/SettingsView';
 import TrackingMapView from './components/TrackingMapView';
 import CompanionAppView from './components/CompanionAppView';
+import ServiceSuiteView from './components/ServiceSuiteView';
 
 import { useEffect } from 'react';
 import { 
@@ -425,6 +427,7 @@ export default function App() {
     { id: 'commission', label: 'Commission settings', icon: DollarSign },
     { id: 'notifications', label: 'Broadcaster Alerts', icon: Bell },
     { id: 'analytics', label: 'Deep Corporate Analytics', icon: BarChart4 },
+    { id: 'servicesSuite', label: 'Services Suite (Core)', icon: Layers },
     { id: 'settings', label: 'Settings & Security', icon: Settings }
   ];
 
@@ -651,6 +654,12 @@ export default function App() {
                   customers={customers} 
                   technicians={technicians} 
                   bookings={bookings} 
+                />
+              )}
+
+              {activeTab === 'servicesSuite' && (
+                <ServiceSuiteView 
+                  language={language}
                 />
               )}
 
