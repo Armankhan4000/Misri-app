@@ -73,7 +73,7 @@
         "location": { "type": "string" },
         "startDate": { "type": "string" },
         "endDate": { "type": "string" },
-        "scheduleDays": { "type": "array" },
+        "scheduleDays": { "type": "array", "items": { "type": "string" } },
         "clicks": { "type": "number" },
         "status": { "type": "string", "enum": ["Active", "Scheduled", "Expired"] }
       },

@@ -68,6 +68,13 @@ import TrackingMapView from './components/TrackingMapView';
 import CompanionAppView from './components/CompanionAppView';
 import ServiceSuiteView from './components/ServiceSuiteView';
 
+import ReportExportView from './components/ReportExportView';
+import SubAdminView from './components/SubAdminView';
+import SupportTicketView from './components/SupportTicketView';
+import AnnouncementView from './components/AnnouncementView';
+import RewardsLeaderboardView from './components/RewardsLeaderboardView';
+import AdminActivityLogView from './components/AdminActivityLogView';
+
 import { useEffect } from 'react';
 import { 
   seedFirestoreIfEmpty,
@@ -427,6 +434,12 @@ export default function App() {
     { id: 'commission', label: 'Commission settings', icon: DollarSign },
     { id: 'notifications', label: 'Broadcaster Alerts', icon: Bell },
     { id: 'analytics', label: 'Deep Corporate Analytics', icon: BarChart4 },
+    { id: 'reportExport', label: 'reportExport', icon: FileText },
+    { id: 'subAdmins', label: 'subAdmins', icon: UserCheck2 },
+    { id: 'supportTickets', label: 'supportTickets', icon: Ticket },
+    { id: 'announcementBoard', label: 'announcementBoard', icon: Megaphone },
+    { id: 'rewardsLeaderboard', label: 'rewardsLeaderboard', icon: Sparkles },
+    { id: 'adminActivitiesLog', label: 'adminActivitiesLog', icon: Lock },
     { id: 'servicesSuite', label: 'Services Suite (Core)', icon: Layers },
     { id: 'settings', label: 'Settings & Security', icon: Settings }
   ];
@@ -604,9 +617,13 @@ export default function App() {
 
               {activeTab === 'companion' && (
                 <CompanionAppView 
+                  technicians={technicians}
                   techniciansCount={technicians.length}
                   bookingsCount={bookings.length}
                   customersCount={customers.length}
+                  onApprove={handleApproveTechnician}
+                  onReject={handleRejectTechnician}
+                  onUpdateVerification={handleUpdateTechnicianVerification}
                 />
               )}
 
@@ -655,6 +672,35 @@ export default function App() {
                   technicians={technicians} 
                   bookings={bookings} 
                 />
+              )}
+
+              {activeTab === 'reportExport' && (
+                <ReportExportView 
+                  bookings={bookings}
+                  technicians={technicians}
+                />
+              )}
+
+              {activeTab === 'subAdmins' && (
+                <SubAdminView />
+              )}
+
+              {activeTab === 'supportTickets' && (
+                <SupportTicketView />
+              )}
+
+              {activeTab === 'announcementBoard' && (
+                <AnnouncementView />
+              )}
+
+              {activeTab === 'rewardsLeaderboard' && (
+                <RewardsLeaderboardView 
+                  technicians={technicians}
+                />
+              )}
+
+              {activeTab === 'adminActivitiesLog' && (
+                <AdminActivityLogView />
               )}
 
               {activeTab === 'servicesSuite' && (

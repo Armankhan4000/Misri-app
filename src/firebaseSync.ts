@@ -20,7 +20,8 @@ import {
   PromoCode, 
   Product, 
   ShopOrder, 
-  SystemLog 
+  SystemLog,
+  AppSettings
 } from './types';
 import { 
   initialCustomers, 
@@ -74,6 +75,20 @@ export async function seedFirestoreIfEmpty() {
         const logId = item.timestamp.replace(/[: -]/g, '_');
         await setDoc(doc(db, 'systemLogs', logId), item);
       }
+
+      // 9. Seed default appSettings/global
+      const defaultSettings: AppSettings = {
+        appName: 'মিস্ত্রি হাব / Mistri Hub',
+        primaryColor: '#0ea5e9', // Sky Blue
+        secondaryColor: '#0f172a', // Slate Dark
+        themeMode: 'dark',
+        emergencyNotice: 'জরুরী ঘোষণা: ঢাকা সিটি করপোরেশন এলাকায় বর্তমানে ইলেকট্রিশিয়ান ও প্লাম্বিং সেবার চাহিদা বেশি!',
+        allowBookingRegistration: true,
+        commissionPercentage: 15,
+        lastUpdated: new Date().toISOString()
+      };
+      await setDoc(doc(db, 'appSettings', 'global'), defaultSettings);
+
       console.log('Seeding process fully finished!');
     }
   } catch (err) {
@@ -260,9 +275,38 @@ export async function updateOrderStatusInCloud(id: string, status: ShopOrder['st
 export async function createSystemLog(log: SystemLog) {
   const path = 'systemLogs';
   try {
-    const logId = log.timestamp.replace(/[: -]/g, '_') + '_' + Math.floor(Math.random() * 100);
+    const logId = log.timestamp.replace(/[: -]/g, '_') + '_' + Math.floor(Math.random() * 105);
     await setDoc(doc(db, 'systemLogs', logId), log);
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
   }
 }
+
+// 9. Companion App Configuration Syncer (Live Settings)
+export async function updateAppSettingsInCloud(settings: AppSettings) {
+  const path = 'appSettings/global';
+  try {
+    await setDoc(doc(db, 'appSettings', 'global'), settings);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+export function listenToAppSettings(callback: (settings: AppSettings | null) => void) {
+  const docRef = doc(db, 'appSettings', 'global');
+  return onSnapshot(
+    docRef,
+    (docSnap) => {
+      if (docSnap.exists()) {
+        callback(docSnap.data() as AppSettings);
+      } else {
+        callback(null);
+      }
+    },
+    (error) => {
+      console.error('Listen to appSettings/global failed:', error);
+      handleFirestoreError(error, OperationType.GET, 'appSettings/global');
+    }
+  );
+}
+

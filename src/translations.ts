@@ -110,6 +110,48 @@ export const translations: Translations = {
     es: 'Suite de Servicios',
     ar: 'حزمة الخدمات المتكاملة'
   },
+  reportExport: {
+    en: '📄 Report Export (PDF/Excel)',
+    bn: '📄 এক্সপোর্ট রিপোর্ট',
+    hi: '📄 रिपोर्ट निर्यात',
+    es: '📄 Exportar Reportes',
+    ar: '📄 تصدير التقارير'
+  },
+  subAdmins: {
+    en: '👨‍💼 Sub-Admin Roles',
+    bn: '👨‍💼 সাব-এডমিন রোল',
+    hi: '👨‍💼 उप-व्यवस्थापक भूमिकाएं',
+    es: '👨‍💼 Roles de Sub-Admin',
+    ar: '👨‍💼 أدوار المشرفين المساعدين'
+  },
+  supportTickets: {
+    en: '🎫 Helpdesk Support Tickets',
+    bn: '🎫 হেল্পডেস্ক সাপোর্ট টিকিট',
+    hi: '🎫 सहायता टिकट',
+    es: '🎫 Soporte de Tickets',
+    ar: '🎫 تذاكر الدعم والhelpdesk'
+  },
+  announcementBoard: {
+    en: '📢 Platform Announcements',
+    bn: '📢 ব্রডকাস্ট এনাউন্সমেন্ট',
+    hi: '📢 घोषणा बोर्ड',
+    es: '📢 Tablón de Anuncios',
+    ar: '📢 لوحة الإعلانات العامة'
+  },
+  rewardsLeaderboard: {
+    en: '🏆 Rewards & Leaderboard',
+    bn: '🏆 লিডারবোর্ড ও রিওয়ার্ডস',
+    hi: '🏆 पुरस्कार और लीडरबोर्ड',
+    es: '🏆 Recompensas y Clasificación',
+    ar: '🏆 المكافآت ولوحة المتصدرين'
+  },
+  adminActivitiesLog: {
+    en: '📜 Admin Activities Audit',
+    bn: '📜 অ্যাডমিন অ্যাক্টিভিটি লক',
+    hi: '📜 व्यवस्थापक गतिविधि लॉग',
+    es: '📜 Registro de Actividades',
+    ar: '📜 سجل أنشطة المسؤولين'
+  },
 
   // General Topbar
   adminPanel: {

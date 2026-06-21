@@ -288,12 +288,50 @@ export default function OnlineShopView({
 
       {/* SUB-TAB 2: INVENTORY LOGS */}
       {subTab === 'Inventory' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden" id="shop-inventory-panel">
-          <div className="p-4 bg-slate-950/40 border-b border-slate-800 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-              <Warehouse className="h-4.5 w-4.5 text-cyan-400" /> Stock Level Matrices & replenishment alerts
-            </h3>
-          </div>
+        <div className="space-y-4" id="shop-inventory-panel">
+          {/* Low Stock scan & auto-reorder controller */}
+          {(() => {
+            const lowStockItems = products.filter(p => p.quantity < 15);
+            if (lowStockItems.length > 0) {
+              return (
+                <div className="bg-amber-950/40 border border-amber-500/30 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-in">
+                  <div className="flex items-start gap-2 text-xs">
+                    <span className="text-xl shrink-0">⚠️</span>
+                    <div>
+                      <p className="font-bold text-amber-400 uppercase tracking-wider font-mono text-[10px]">Low stock alert warnings / কম স্টক অ্যালার্ট</p>
+                      <p className="text-slate-300 mt-1 col-span-none">
+                        The trailing spare items are below safe buffer thresholds (15 units): <strong className="text-white">{lowStockItems.map(i => i.name).join(', ')}</strong>.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    id="btn-auto-reorder-trigger"
+                    onClick={() => {
+                      lowStockItems.forEach(item => {
+                        onUpdateInventory(item.id, item.quantity + 50);
+                      });
+                      alert(`AUTOMATED DISPATCH: Reorder request emails successfully fired to vendors: ${Array.from(new Set(lowStockItems.map(i => i.vendor))).join(', ')}! Assigned quantity bulk refilled (+50 units each).`);
+                    }}
+                    className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-955 text-xs font-black rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                  >
+                    ⚡ Trigger Auto-Reorder Requests
+                  </button>
+                </div>
+              );
+            }
+            return (
+              <div className="bg-emerald-950/20 border border-emerald-500/10 p-3 rounded-xl text-emerald-450 text-[11px] font-sans flex items-center gap-2">
+                <span>✓</span> All spare parts catalogs are fully stocked above safety thresholds. No reorders needed!
+              </div>
+            );
+          })()}
+
+          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div className="p-4 bg-slate-950/40 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                <Warehouse className="h-4.5 w-4.5 text-cyan-400" /> Stock Level Matrices & replenishment alerts
+              </h3>
+            </div>
           <table className="w-full text-left" id="inventory-data-table">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950 text-slate-500 text-xs font-mono">
@@ -352,7 +390,8 @@ export default function OnlineShopView({
             </tbody>
           </table>
         </div>
-      )}
+      </div>
+    )}
 
       {/* SUB-TAB 3: ORDERS & RETURNS LOG */}
       {subTab === 'Orders' && (

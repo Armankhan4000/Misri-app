@@ -23,13 +23,19 @@ interface BookingViewProps {
 }
 
 export default function BookingManagementView({ bookings, onResolveDispute }: BookingViewProps) {
+  const [localBookings, setLocalBookings] = useState<Booking[]>(bookings);
   const [searchTerm, setSearchTerm] = useState('');
   const [tab, setTab] = useState<'Live' | 'Completed' | 'Cancelled' | 'Disputes'>('Live');
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [resolutionNote, setResolutionNote] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  React.useEffect(() => {
+    setLocalBookings(bookings);
+  }, [bookings]);
 
   // Filtering Bookings
-  const filteredBookings = bookings.filter(b => {
+  const filteredBookings = localBookings.filter(b => {
     const matchesSearch = b.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           b.technicianName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           b.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,7 +47,7 @@ export default function BookingManagementView({ bookings, onResolveDispute }: Bo
     return matchesSearch && b.status === tab;
   });
 
-  const selectedBooking = bookings.find(b => b.id === selectedBookingId);
+  const selectedBooking = localBookings.find(b => b.id === selectedBookingId);
 
   return (
     <div className="space-y-6" id="booking-view-main">
@@ -104,12 +110,110 @@ export default function BookingManagementView({ bookings, onResolveDispute }: Bo
         </div>
       </div>
 
+      {/* Bulk Actions Panel */}
+      {selectedIds.length > 0 && (
+        <div className="bg-slate-900 border-2 border-cyan-500/30 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-in">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-black text-slate-950 bg-cyan-400 px-2.5 py-1.5 rounded-lg">
+              {selectedIds.length} SELECTED
+            </span>
+            <div>
+              <p className="text-xs font-bold text-white">বাল্ক অ্যাকশন প্যানেল (Bulk Operations Desk)</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">একসাথে একাধিক বুকিংয়ের স্থিতি পরিবর্তন বা কারিগর নিয়োগ করুন।</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Status updates */}
+            <div className="flex items-center gap-1.5">
+              <select
+                id="bulk-status-select-action"
+                className="bg-slate-950 border border-slate-800 text-xs text-slate-205 py-2 px-3 rounded-xl focus:outline-none focus:border-cyan-500"
+              >
+                <option value="Completed">Mark Completed (সম্পন্ন)</option>
+                <option value="Live">Mark Live (চলমান)</option>
+                <option value="Cancelled">Mark Cancelled (বাতিল)</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  const selector = document.getElementById('bulk-status-select-action') as HTMLSelectElement;
+                  if (selector) {
+                    const status = selector.value as any;
+                    setLocalBookings(localBookings.map(b => selectedIds.includes(b.id) ? { ...b, status } : b));
+                    alert(`Successfully updated status to ${status} for ${selectedIds.length} active dispatches!`);
+                    setSelectedIds([]);
+                  }
+                }}
+                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-955 text-xs font-black rounded-xl transition-all cursor-pointer"
+              >
+                Apply
+              </button>
+            </div>
+
+            {/* Technicians assign */}
+            <div className="flex items-center gap-1.5">
+              <select
+                id="bulk-tech-select-action"
+                className="bg-slate-950 border border-slate-800 text-xs text-slate-205 py-2 px-3 rounded-xl focus:outline-none focus:border-cyan-500"
+              >
+                <option value="Imran Malik">Imran Malik (AC Mechanic)</option>
+                <option value="Suresh Kumar">Suresh Kumar (Plumber)</option>
+                <option value="Kabir Hossain">Kabir Hossain (Electrician)</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  const selector = document.getElementById('bulk-tech-select-action') as HTMLSelectElement;
+                  if (selector) {
+                    const tech = selector.value;
+                    setLocalBookings(localBookings.map(b => selectedIds.includes(b.id) ? { ...b, technicianName: tech } : b));
+                    alert(`Successfully assigned technician ${tech} to ${selectedIds.length} bookings!`);
+                    setSelectedIds([]);
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl transition-all cursor-pointer"
+              >
+                Assign
+              </button>
+            </div>
+
+            {/* Cancel trigger */}
+            <button
+              type="button"
+              onClick={() => {
+                setLocalBookings(localBookings.map(b => selectedIds.includes(b.id) ? { ...b, status: 'Cancelled' as const } : b));
+                alert(`Successfully cancelled all ${selectedIds.length} select items!`);
+                setSelectedIds([]);
+              }}
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black rounded-xl transition-all cursor-pointer"
+            >
+              Cancel All
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Booking Records Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm" id="bookings-table-container">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse" id="bookings-data-table">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/40 text-slate-400 text-xs font-mono">
+                <th className="py-4 px-5 w-12 text-center">
+                  <input
+                    type="checkbox"
+                    checked={filteredBookings.length > 0 && filteredBookings.every(b => selectedIds.includes(b.id))}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(filteredBookings.map(b => b.id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                    className="h-4 w-4 bg-slate-950 border-slate-800 rounded accent-cyan-500 cursor-pointer"
+                  />
+                </th>
                 <th className="py-4 px-5">ID / Date</th>
                 <th className="py-4 px-5">Customer details</th>
                 <th className="py-4 px-5">Technician / Category</th>
@@ -127,6 +231,20 @@ export default function BookingManagementView({ bookings, onResolveDispute }: Bo
                   className="hover:bg-slate-800/20 transition-all cursor-pointer group"
                   onClick={() => setSelectedBookingId(b.id)}
                 >
+                  <td className="py-4 px-5 text-center" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(b.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds([...selectedIds, b.id]);
+                        } else {
+                          setSelectedIds(selectedIds.filter(id => id !== b.id));
+                        }
+                      }}
+                      className="h-4 w-4 bg-slate-950 border-slate-850 rounded accent-cyan-500 cursor-pointer"
+                    />
+                  </td>
                   <td className="py-4 px-5">
                     <p className="font-mono text-slate-200 group-hover:text-cyan-400 transition-colors font-semibold">{b.id}</p>
                     <p className="text-[10px] text-slate-500 font-mono">{b.date}</p>

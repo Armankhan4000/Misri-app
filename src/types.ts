@@ -106,3 +106,15 @@ export interface SystemLog {
   module: string;
   message: string;
 }
+
+export interface AppSettings {
+  appName: string;
+  primaryColor: string;
+  secondaryColor: string;
+  themeMode: 'dark' | 'light';
+  emergencyNotice: string;
+  allowBookingRegistration: boolean;
+  commissionPercentage: number;
+  lastUpdated: string;
+}
+

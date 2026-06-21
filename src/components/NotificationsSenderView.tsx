@@ -32,6 +32,11 @@ export default function NotificationsSenderView() {
   const [announcementTitle, setAnnouncementTitle] = useState('Upcoming Regulatory Compliance Checklist update');
   const [announcementBody, setAnnouncementBody] = useState('To adhere to newly enacted national technician work regulations, secondary verification of digital identity cards (NID) will occur on June 15.');
 
+  // Scheduling states
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState('2026-06-25');
+  const [scheduleTime, setScheduleTime] = useState('09:00');
+
   // Prepopulated logs
   const [dispatchedNotices, setDispatchedNotices] = useState([
     { id: 'not-01', title: 'Emergency Cyclone AC service support', body: 'AC Mechanics in coastal zones receive dynamic hazard rate offsets.', target: 'Technicians', timestamp: '2026-06-08 14:22', style: 'Push' },
@@ -52,20 +57,25 @@ export default function NotificationsSenderView() {
     setDispatchedNotices([
       {
         id: `not-${Math.floor(Math.random() * 1000)}`,
-        title: pushTitle,
+        title: pushTitle + (isScheduled ? ' [SCHEDULED]' : ''),
         body: pushBody,
         target: pushTarget === 'all' ? 'All' : pushTarget === 'customers' ? 'Customers' : 'Technicians',
-        timestamp: 'Just Now',
+        timestamp: isScheduled ? `Scheduled: ${scheduleDate} ${scheduleTime}` : 'Just Now',
         style: 'Push'
       },
       ...dispatchedNotices
     ]);
 
-    triggerSuccessAlert(`Push Alert successfully broadcasted to ${pushTarget} cohort!`);
+    if (isScheduled) {
+      triggerSuccessAlert(`Push Alert successfully scheduled for ${scheduleDate} at ${scheduleTime}!`);
+    } else {
+      triggerSuccessAlert(`Push Alert successfully broadcasted to ${pushTarget} cohort!`);
+    }
     
     // Clear
     setPushTitle('');
     setPushBody('');
+    setIsScheduled(false);
   };
 
   const handleSendSms = (e: React.FormEvent) => {
@@ -75,17 +85,22 @@ export default function NotificationsSenderView() {
     setDispatchedNotices([
       {
         id: `not-${Math.floor(Math.random() * 1000)}`,
-        title: 'Bulk SMS Campaign Broadcast',
+        title: 'Bulk SMS Campaign Broadcast' + (isScheduled ? ' [SCHEDULED]' : ''),
         body: smsBody,
         target: smsCohort === 'all' ? 'All' : 'Customers',
-        timestamp: 'Just Now',
+        timestamp: isScheduled ? `Scheduled: ${scheduleDate} ${scheduleTime}` : 'Just Now',
         style: 'SMS'
       },
       ...dispatchedNotices
     ]);
 
-    triggerSuccessAlert(`Bulk SMS Campaign successfully dispatched via Twilio/SMS API Gateway.`);
+    if (isScheduled) {
+      triggerSuccessAlert(`Bulk SMS Campaign successfully scheduled for ${scheduleDate} at ${scheduleTime}!`);
+    } else {
+      triggerSuccessAlert(`Bulk SMS Campaign successfully dispatched via Twilio/SMS API Gateway.`);
+    }
     setSmsBody('');
+    setIsScheduled(false);
   };
 
   const handleSendAnnouncement = (e: React.FormEvent) => {
@@ -231,6 +246,36 @@ export default function NotificationsSenderView() {
                   </div>
                 </div>
 
+                {/* Future Scheduling panel for Push */}
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 space-y-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[10.5px] uppercase font-bold text-slate-400 font-mono">📅 Schedule Broadcast for Future Date?</span>
+                    <input
+                      id="push-schedule-checkbox"
+                      type="checkbox"
+                      checked={isScheduled}
+                      onChange={(e) => setIsScheduled(e.target.checked)}
+                      className="h-4 w-4 bg-slate-900 border-slate-800 rounded accent-cyan-500 cursor-pointer"
+                    />
+                  </div>
+                  {isScheduled && (
+                    <div className="grid grid-cols-2 gap-2 animate-slide-in">
+                      <input
+                        type="date"
+                        value={scheduleDate}
+                        onChange={(e) => setScheduleDate(e.target.value)}
+                        className="bg-slate-900 border border-slate-800 p-2 text-xs text-white rounded font-mono"
+                      />
+                      <input
+                        type="time"
+                        value={scheduleTime}
+                        onChange={(e) => setScheduleTime(e.target.value)}
+                        className="bg-slate-900 border border-slate-800 p-2 text-xs text-white rounded font-mono"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <button
                   id="btn-broadcast-push"
                   type="submit"
@@ -304,6 +349,36 @@ export default function NotificationsSenderView() {
                       ₹{(smsCohort === 'customers' ? 7200 * 0.15 : 7710 * 0.15).toFixed(0)} (~0.15 per SMS)
                     </div>
                   </div>
+                </div>
+
+                {/* Future Scheduling panel for SMS */}
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 space-y-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[10.5px] uppercase font-bold text-slate-400 font-mono">📅 Schedule SMS Dispatch for Future?</span>
+                    <input
+                      id="sms-schedule-checkbox"
+                      type="checkbox"
+                      checked={isScheduled}
+                      onChange={(e) => setIsScheduled(e.target.checked)}
+                      className="h-4 w-4 bg-slate-900 border-slate-800 rounded accent-indigo-500 cursor-pointer"
+                    />
+                  </div>
+                  {isScheduled && (
+                    <div className="grid grid-cols-2 gap-2 animate-slide-in">
+                      <input
+                        type="date"
+                        value={scheduleDate}
+                        onChange={(e) => setScheduleDate(e.target.value)}
+                        className="bg-slate-900 border border-slate-800 p-2 text-xs text-white rounded font-mono"
+                      />
+                      <input
+                        type="time"
+                        value={scheduleTime}
+                        onChange={(e) => setScheduleTime(e.target.value)}
+                        className="bg-slate-900 border border-slate-800 p-2 text-xs text-white rounded font-mono"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <button

@@ -142,49 +142,115 @@ export default function CommissionManagementView({ technicians, bookings }: Comm
             </button>
           </div>
 
-          {/* Table: Category-specific rules */}
-          <div className="space-y-3" id="category-wise-commissions bg-slate-905">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <Layers className="h-3.5 w-3.5 text-cyan-400" /> Category-Specific Platform Commission Coefficients
-            </h3>
-            <div className="border border-slate-800 rounded-lg overflow-hidden text-xs">
-              <table className="w-full text-left" id="category-commissions-table">
-                <thead className="bg-slate-950 text-slate-500 font-mono">
-                  <tr>
-                    <th className="py-2.5 px-4">Service Category Class</th>
-                    <th className="py-2.5 px-4">App Default Platform cut</th>
-                    <th className="py-2.5 px-4 text-right">Adjust Rate</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                  {categories.map((c) => (
-                    <tr key={c.category} className="hover:bg-slate-800/10">
-                      <td className="py-2.5 px-4 font-semibold text-slate-100 flex items-center gap-1.5">
-                        <Wrench className="h-3.5 w-3.5 text-slate-500" /> {c.category}
-                      </td>
-                      <td className="py-2.5 px-4 font-bold font-mono text-cyan-400">{c.rate}%</td>
-                      <td className="py-2.5 px-4 text-right font-sans">
-                        <div className="flex gap-1 justify-end">
-                          <button
-                            id={`btn-dec-comm-${c.category}`}
-                            onClick={() => handleUpdateCategoryRate(c.category, Math.max(5, c.rate - 1))}
-                            className="px-1.5 py-0.5 bg-slate-850 hover:bg-slate-800 rounded text-[10px] font-mono cursor-pointer border border-slate-800"
-                          >
-                            -1%
-                          </button>
-                          <button
-                            id={`btn-inc-comm-${c.category}`}
-                            onClick={() => handleUpdateCategoryRate(c.category, Math.min(30, c.rate + 1))}
-                            className="px-1.5 py-0.5 bg-slate-850 hover:bg-slate-800 rounded text-[10px] font-mono cursor-pointer border border-slate-800 text-cyan-400"
-                          >
-                            +1%
-                          </button>
-                        </div>
-                      </td>
+          {/* Table: Category-specific rules and Bulk update layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="category-wise-commissions bg-slate-905">
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <Layers className="h-3.5 w-3.5 text-cyan-400" /> Category Commission Rates
+              </h3>
+              <div className="border border-slate-800 rounded-lg overflow-hidden text-xs">
+                <table className="w-full text-left" id="category-commissions-table">
+                  <thead className="bg-slate-950 text-slate-500 font-mono">
+                    <tr>
+                      <th className="py-2.5 px-4">Service Category Class</th>
+                      <th className="py-2.5 px-4">App Default Platform cut</th>
+                      <th className="py-2.5 px-4 text-right">Adjust Rate</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                    {categories.map((c) => (
+                      <tr key={c.category} className="hover:bg-slate-800/10">
+                        <td className="py-2.5 px-4 font-semibold text-slate-100 flex items-center gap-1.5">
+                          <Wrench className="h-3.5 w-3.5 text-slate-500" /> {c.category}
+                        </td>
+                        <td className="py-2.5 px-4 font-bold font-mono text-cyan-400">{c.rate}%</td>
+                        <td className="py-2.5 px-4 text-right font-sans">
+                          <div className="flex gap-1 justify-end">
+                            <button
+                              id={`btn-dec-comm-${c.category}`}
+                              onClick={() => handleUpdateCategoryRate(c.category, Math.max(5, c.rate - 1))}
+                              className="px-1.5 py-0.5 bg-slate-850 hover:bg-slate-800 rounded text-[10px] font-mono cursor-pointer border border-slate-800"
+                            >
+                              -1%
+                            </button>
+                            <button
+                              id={`btn-inc-comm-${c.category}`}
+                              onClick={() => handleUpdateCategoryRate(c.category, Math.min(30, c.rate + 1))}
+                              className="px-1.5 py-0.5 bg-slate-850 hover:bg-slate-800 rounded text-[10px] font-mono cursor-pointer border border-slate-800 text-cyan-400"
+                            >
+                              +1%
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Bulk Update Card */}
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-4.5 space-y-4 flex flex-col justify-between">
+              <div>
+                <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Percent className="h-4 w-4 text-cyan-400" /> Bulk Category Rate Update / এককালীন আপডেট
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-1 leading-normal">
+                  একটি নির্দিষ্ট ডিসিপ্লিনের অন্তর্গত সকল মিস্ত্রিদের ওয়ালেট ও অর্ডার ফি একবারে বাল্ক আপডেট করুন।
+                </p>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 uppercase font-mono font-bold block">Select Category</label>
+                  <select
+                    id="bulk-category-select"
+                    value={defaultRate === 15 ? "Plumber" : "AC Mechanic"}
+                    onChange={(e) => {
+                      const cat = e.target.value;
+                      const matched = categories.find(c => c.category === cat);
+                      if (matched) {
+                        alert(`Bulk setting is primed for ${cat}. Apply rate using adjust button.`);
+                      }
+                    }}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none"
+                  >
+                    {categories.map(c => (
+                      <option key={c.category} value={c.category}>{c.category}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 uppercase font-mono font-bold block">Bulk Rate (%)</label>
+                  <input
+                    id="bulk-rate-input-field"
+                    type="number"
+                    min="5"
+                    max="30"
+                    defaultValue="16"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none font-mono"
+                    placeholder="e.g. 15"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selector = document.getElementById('bulk-category-select') as HTMLSelectElement;
+                    const valField = document.getElementById('bulk-rate-input-field') as HTMLInputElement;
+                    if (selector && valField) {
+                      const cat = selector.value;
+                      const rate = Number(valField.value);
+                      handleUpdateCategoryRate(cat, rate);
+                      alert(`Successfully executed bulk update of commission rate to ${rate}% for entire category: ${cat}!`);
+                    }
+                  }}
+                  className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-black rounded-xl cursor-pointer"
+                >
+                  Apply Category Bulk Update
+                </button>
+              </div>
             </div>
           </div>
         </div>
