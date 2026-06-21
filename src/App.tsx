@@ -23,7 +23,9 @@ import {
   MapPin,
   Smartphone,
   Globe,
-  Layers
+  Layers,
+  FileText,
+  Sparkles
 } from 'lucide-react';
 
 import { Language, getTranslation } from './translations';
@@ -678,6 +680,7 @@ export default function App() {
                 <ReportExportView 
                   bookings={bookings}
                   technicians={technicians}
+                  customers={customers}
                 />
               )}
 
@@ -700,7 +703,9 @@ export default function App() {
               )}
 
               {activeTab === 'adminActivitiesLog' && (
-                <AdminActivityLogView />
+                <AdminActivityLogView 
+                  logs={logs}
+                />
               )}
 
               {activeTab === 'servicesSuite' && (

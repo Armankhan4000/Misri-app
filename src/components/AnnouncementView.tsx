@@ -10,8 +10,7 @@ import {
   Clock, 
   Eye, 
   Smartphone, 
-  Target, 
-  LayoutBoards 
+  Target 
 } from 'lucide-react';
 
 interface Announcement {
